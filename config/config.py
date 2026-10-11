@@ -1,0 +1,1 @@
+DB_URL = "postgresql+psycopg2://postgres:saidakbar1175@localhost:5432/amo_crm" 
