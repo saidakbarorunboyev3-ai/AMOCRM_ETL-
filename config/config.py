@@ -1,1 +1,1 @@
-DB_URL = "postgresql+psycopg2://postgres:saidakbar1175@localhost:5432/amo_crm" 
+DB_URL = "postgresql+psycopg2://USER:PASSWORD5@host.docker.internal:5432/DATABASE" 
