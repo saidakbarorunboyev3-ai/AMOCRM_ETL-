@@ -64,7 +64,7 @@ Users, companies, contacts and leads are loaded first; tasks are loaded last bec
 ## 📁 Project structure
 
 ```
-amocrm-airflow-etl/
+AMOCRM_ETL-/
 ├── dags/
 │   └── pipelines/
 │       ├── amocrm_dag.py      # Airflow DAG (BashOperator per entity)
@@ -85,6 +85,8 @@ amocrm-airflow-etl/
 └── README.md
 ```
 
+> The cloned folder is named **`AMOCRM_ETL-`** (with a trailing dash), exactly like the repository.
+
 ---
 
 ## 🧰 Requirements
@@ -102,8 +104,15 @@ amocrm-airflow-etl/
 
 ```bash
 git clone https://github.com/saidakbarorunboyev3-ai/AMOCRM_ETL-.git
-cd amocrm-airflow-etl
+cd AMOCRM_ETL-
+dir        # Windows PowerShell (Linux/macOS: ls)
 ```
+
+You should see `docker-compose.yaml` in the list.
+
+> ⚠️ **Every `docker compose` command must be run from this folder**, the one that contains `docker-compose.yaml`. Docker looks for the file only in the **current** folder. If you see `no configuration file provided: not found`, you are in the wrong folder.
+
+> 💡 Tip: copy the clone URL from the green **Code** button on GitHub instead of typing it by hand (a typo such as `.gi` instead of `.git` gives `Repository not found`).
 
 ### 2. Create the `.env` file
 
@@ -194,7 +203,10 @@ CREATE DATABASE amocrm_db;
 
 ### 1. Start Airflow
 
+Make sure you are inside the project folder (the one that contains `docker-compose.yaml`):
+
 ```bash
+cd AMOCRM_ETL-
 docker compose up -d
 docker compose ps
 ```
@@ -204,6 +216,31 @@ The first start takes a few minutes (images are downloaded and the database is i
 ### 2. Open the Airflow UI
 
 Go to **http://localhost:8080** and log in. The default credentials are defined in `docker-compose.yaml` (usually `airflow` / `airflow`).
+
+> If port 8080 is busy and you changed the mapping to `"8081:8080"`, open **http://localhost:8081** instead.
+
+#### Optional: change the port
+
+If port 8080 is already in use, edit the `airflow-apiserver` service in `docker-compose.yaml`:
+
+```yaml
+airflow-apiserver:
+  <<: *airflow-common
+  command: api-server
+  ports:
+    - "8081:8080"      # host port : container port
+```
+
+- The **first** number (`8081`) is the port on your computer. This is the one you open in the browser.
+- The **second** number (`8080`) is the port inside the container. **Do not change it.**
+- Do **not** change the healthcheck URL (`http://localhost:8080/...`). It runs inside the container.
+
+Then restart:
+
+```bash
+docker compose down
+docker compose up -d
+```
 
 ### 3. Trigger the DAG
 
@@ -246,6 +283,23 @@ contacts = get_table("contacts")
 pipelines = get_table("leads/pipelines")
 ```
 
+### Optional: run a script locally (without Docker)
+
+Scripts can also be run directly on your computer for testing. Install the dependencies first:
+
+```bash
+pip install python-dotenv requests pandas
+```
+
+Then go to the scripts folder and run one:
+
+```bash
+cd dags/pipelines
+python amo_leads.py
+```
+
+> The package is installed as `python-dotenv`, but imported as `dotenv`.
+
 ### Optional: create test data
 
 If your amoCRM account is empty, `create_fake.py` can add fake companies, contacts and leads for testing. Use it **only on a test account**, and run it once.
@@ -256,9 +310,16 @@ If your amoCRM account is empty, `create_fake.py` can add fake companies, contac
 
 | Problem | Cause and fix |
 |---|---|
+| `no configuration file provided: not found` | You are in the wrong folder. `docker compose` looks for `docker-compose.yaml` only in the **current** folder. Run `cd AMOCRM_ETL-`, check with `dir` / `ls` that the file is there, then retry. |
+| `Cannot find path ... because it does not exist` (`cd` error) | The folder name is wrong. The cloned folder is `AMOCRM_ETL-` (with a trailing dash). Check the real name with `dir`. |
+| `repository ... not found` on `git clone` | The URL is mistyped (for example `.gi` instead of `.git`) or the repo name is wrong. Copy the URL from the green **Code** button on GitHub. |
+| `can't open file '...\amo_leads.py': No such file or directory` | You are not in the folder that contains the script. Run `cd dags/pipelines` first, or right-click the folder in VS Code and choose **Open in Integrated Terminal**. |
+| Terminal shows `PS ...>` or `>>` inside the command, and PowerShell says a term is not recognized | You pasted the prompt text together with the command. Type only the command itself. Press **Ctrl + C** to clear a stuck `>>` prompt. |
+| `ModuleNotFoundError: No module named 'dotenv'` (running scripts locally) | Run `pip install python-dotenv requests pandas`. The package name is `python-dotenv`, not `dotenv`. |
 | `failed to read .env ... unexpected character` | `.env` is saved as UTF-16. Re-save it as **UTF-8**. |
 | `failed to connect to the docker API` | Docker Desktop is not running. Start it and wait until it is ready. |
-| `Bind for 0.0.0.0:8080 failed: port is already allocated` | Another container or program uses port 8080. Stop it or change the port mapping to `8081:8080`. |
+| `Bind for 0.0.0.0:8080 failed: port is already allocated` | Another container or program uses port 8080. Stop it, or change the mapping under `airflow-apiserver` to `"8081:8080"` (host port : container port) and open **http://localhost:8081**. Do not change the container port or the healthcheck URL. |
+| Airflow UI does not open on `localhost:8081` | After changing the port to `8081:8080`, restart with `docker compose down` then `docker compose up -d`. Keep the healthcheck on `localhost:8080`. |
 | `ModuleNotFoundError: No module named 'dags'` | Use `from amo import get_table` (the scripts run inside `dags/pipelines`). |
 | `ModuleNotFoundError: No module named 'pandas'` | Dependencies are missing in the Airflow image. Add them via `_PIP_ADDITIONAL_REQUIREMENTS` in `docker-compose.yaml` or build a custom image. |
 | Request goes to `none.kommo.com` / HTTP `402` | `AMO_SUBDOMAIN` did not reach the container. Add `AMO_SUBDOMAIN: ${AMO_SUBDOMAIN}` and `AMO_TOKEN: ${AMO_TOKEN}` to `environment:` in `docker-compose.yaml`, then run `docker compose up -d`. |
