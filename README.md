@@ -101,7 +101,7 @@ amocrm-airflow-etl/
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/saidakbarorunboyev3-ai/amocrm-airflow-etl.git
+git clone https://github.com/saidakbarorunboyev3-ai/AMOCRM_ETL-.git
 cd amocrm-airflow-etl
 ```
 
