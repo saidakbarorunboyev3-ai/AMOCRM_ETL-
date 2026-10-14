@@ -31,7 +31,7 @@ if contactsdf.empty:
 # 2) Asosiy jadval
 columns = ['id', 'name', 'first_name', 'last_name', 'responsible_user_id', 'group_id',
            'created_by', 'updated_by', 'created_at', 'updated_at', 'closest_task_at',
-           'is_deleted', 'is_unsorted', 'account_id', '_links.self.href', '_embedded.tags']
+           'is_deleted', 'is_unsorted', 'account_id', '_links.self.href']
 
 contact_tayyor = contactsdf.reindex(columns=columns)
 contact_tayyor = contact_tayyor.rename(columns={
