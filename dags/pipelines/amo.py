@@ -12,7 +12,7 @@ TOKEN = os.getenv("AMO_TOKEN")
 if not SUBDOMAIN or not TOKEN:
     raise RuntimeError("AMO_SUBDOMAIN yoki AMO_TOKEN topilmadi!")
 
-# Soddalashtirish: Session yaratib, bazaviy URL va headerlarni bir marta ulab qo'yamiz
+
 session = requests.Session()
 session.headers.update({"Authorization": f"Bearer {TOKEN}"})
 BASE_URL = f"https://{SUBDOMAIN}.amocrm.ru/api/v4"
@@ -28,10 +28,10 @@ def get_table(name, limit=250, params=None, pause=0.2):
     while True:
         query = {"limit": limit, "page": page, **(params or {})}
         
-        # requests.Session() yordamida so'rov yuborish
+       
         r = session.get(f"{BASE_URL}/{name}", params=query, timeout=30)
 
-        # Xatoliklar yoki tugash holatini tekshirish
+        
         if r.status_code == 204 or not r.ok:
             break
 
@@ -44,7 +44,7 @@ def get_table(name, limit=250, params=None, pause=0.2):
         rows.extend(items)
         print(f"{name}: {page}-sahifa olindi, jami {len(rows)} ta")
 
-        # Keyingi sahifa bor-yo'qligini tekshirish
+       
         if "next" not in data.get("_links", {}):
             break
             
