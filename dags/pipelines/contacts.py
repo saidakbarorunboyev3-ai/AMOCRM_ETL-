@@ -34,10 +34,7 @@ columns = ['id', 'name', 'first_name', 'last_name', 'responsible_user_id', 'grou
            'is_deleted', 'is_unsorted', 'account_id', '_links.self.href']
 
 contact_tayyor = contactsdf.reindex(columns=columns)
-contact_tayyor = contact_tayyor.rename(columns={
-    '_links.self.href': 'links_self_href',
-    '_embedded.tags': 'embedded_tags',
-})
+
 contact_tayyor = stringify(contact_tayyor)
 
 loader(contact_tayyor, 'Contacts')
